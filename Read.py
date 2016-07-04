@@ -5,24 +5,27 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 
+
 class bcolors:
-    CYAN = '\033[96m'
-    CYAN_BRIGHT = '\033[96;1m'
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    BLUE_BRIGHT = '\033[94;1m'
-    GREEN = '\033[92m'
+    CYAN         = '\033[96m'
+    CYAN_BRIGHT  = '\033[96;1m'
+    HEADER       = '\033[95m'
+    BLUE         = '\033[94m'
+    BLUE_BRIGHT  = '\033[94;1m'
+    GREEN        = '\033[92m'
     GREEN_BRIGHT = '\033[92;1m'
-    WARNING = '\033[93;1m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    WARNING      = '\033[93;1m'
+    FAIL         = '\033[91m'
+    ENDC         = '\033[0m'
+    BOLD         = '\033[1m'
+    UNDERLINE    = '\033[4m'
 
 continue_reading = True
 
 # Capture SIGINT for cleanup when the script is aborted
-def end_read(signal,frame):
+
+
+def end_read(signal, frame):
     global continue_reading
     print("Ctrl+C captured, ending read.")
     continue_reading = False
@@ -42,23 +45,23 @@ print("Press Ctrl-C to stop.")
 while continue_reading:
 
     # Scan for cards
-    (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+    (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print("Card detected")
 
     # Get the UID of the card
-    (status,uid) = MIFAREReader.MFRC522_Anticoll()
+    (status, uid) = MIFAREReader.MFRC522_Anticoll()
 
     # If we have the UID, continue
     if status == MIFAREReader.MI_OK:
 
         # Print UID
-        print("Card read UID: "+str(uid[0])+","+str(uid[1])+","+str(uid[2])+","+str(uid[3]))
+        print("Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3]))
 
         # This is the default key for authentication
-        key = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
+        key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
 
         # Select the scanned tag
         MIFAREReader.MFRC522_SelectTag(uid)
@@ -69,7 +72,7 @@ while continue_reading:
 
             # Check if authenticated
             if status == MIFAREReader.MI_OK:
-                print("{}{:-^58}{}".format(bcolors.BLUE_BRIGHT, " Sector {} ".format(i//4), bcolors.ENDC))
+                print("{}{:-^58}{}".format(bcolors.BLUE_BRIGHT, " Sector {} ".format(i // 4), bcolors.ENDC))
                 MIFAREReader.MFRC522_Read(i)
                 MIFAREReader.MFRC522_Read(i + 1)
                 MIFAREReader.MFRC522_Read(i + 2)
