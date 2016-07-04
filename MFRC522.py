@@ -208,7 +208,7 @@ class MFRC522:
             else:
                 status = self.MI_ERR
 
-    return (status, backData, backLen)
+        return (status, backData, backLen)
 
     def MFRC522_Request(self, reqMode):
         status = None
