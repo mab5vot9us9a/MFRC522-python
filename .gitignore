@@ -1,0 +1,32 @@
+Incorrect Usage.
+
+NAME:
+   
+ ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄ 
+▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌
+ ▀▀▀▀▀█░█▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀ 
+      ▐░▌    ▐░▌       ▐░▌▐░▌          
+      ▐░▌    ▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄▄▄ 
+      ▐░▌    ▐░▌       ▐░▌▐░░░░░░░░░░░▌
+      ▐░▌    ▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀▀▀ 
+      ▐░▌    ▐░▌       ▐░▌▐░▌          
+ ▄▄▄▄▄█░▌    ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄ 
+▐░░░░░░░▌    ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌
+ ▀▀▀▀▀▀▀      ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀ 
+ - generate .gitignore files from the command line
+
+USAGE:
+   joe command [arguments...]
+   
+VERSION:
+   1.0.0
+   
+COMMANDS:
+    ls	list all available files
+    u	update all available gitignore files
+    g	generate gitignore files
+
+GLOBAL OPTIONS:
+   --help, -h		show help
+   --version, -v	print the version
+   
