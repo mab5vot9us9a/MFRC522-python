@@ -27,41 +27,47 @@ print("Welcome to the MFRC522 data read example")
 print("Press Ctrl-C to stop.")
 
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
-while continue_reading:
+# while continue_reading:
 
-    # Scan for cards
-    (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
+# Scan for cards
+(status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
 
-    # If a card is found
+# If a card is found
+if status == MIFAREReader.MI_OK:
+    print("Card detected")
+
+# Get the UID of the card
+(status, uid) = MIFAREReader.Anticoll()
+
+# If we have the UID, continue
+if status == MIFAREReader.MI_OK:
+
+    # Print UID
+    print("Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3]))
+
+    # This is the default key for authentication
+    key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+
+    # Select the scanned tag
+    MIFAREReader.SelectTag(uid)
+
+    block_number = 8
+
+    # Authenticate
+    status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, block_number, key, uid)
+
+    # Check if authenticated
     if status == MIFAREReader.MI_OK:
-        print("Card detected")
+        MIFAREReader.Read(block_number)
+    else:
+        print("Authentication error")
 
-    # Get the UID of the card
-    (status, uid) = MIFAREReader.Anticoll()
+    data = MIFAREReader.DumpClassic1K_Data(key, uid)
 
-    # If we have the UID, continue
-    if status == MIFAREReader.MI_OK:
+    MIFAREReader.StopCrypto1()
 
-        # Print UID
-        print("Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3]))
-
-        # This is the default key for authentication
-        key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-
-        # Select the scanned tag
-        MIFAREReader.SelectTag(uid)
-
-        block_number = 8
-
-        # Authenticate
-        status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, block_number, key, uid)
-
-        # Check if authenticated
-        if status == MIFAREReader.MI_OK:
-            MIFAREReader.Read(block_number)
-        else:
-            print("Authentication error")
-
-        print(MIFAREReader.DumpClassic1K_Data(key, uid))
-
-        MIFAREReader.StopCrypto1()
+    for block in data:
+        b = ""
+        for byte in block:
+            b += chr(byte)
+        print(b)
