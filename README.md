@@ -7,7 +7,7 @@ This is a Python port of the example code for the NFC module MF522-AN.
 
 ##Requirements
 This code requires you to have SPI-Py installed from the following repository:
-https://github.com/lthiery/SPI-Py
+https://github.com/mab5vot9us9a/SPI-Py
 
 ##Examples
 This repository includes a couple of examples showing how to read, write, and dump data from a chip. They are thoroughly commented, and should be easy to understand.
