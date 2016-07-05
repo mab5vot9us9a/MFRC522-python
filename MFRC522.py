@@ -124,6 +124,9 @@ class MFRC522:
         GPIO.output(self.NRSTPD, 1)
         self.Init()
 
+    def __del__(self):
+        GPIO.cleanup()
+
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
             return self.__colored_print__[0]
@@ -318,7 +321,7 @@ class MFRC522:
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
 
         if (status == self.MI_OK) and (backLen == 0x18):
-            print("Size: " + str(backData[0]))
+            # print("Size: " + str(backData[0]))
             return backData[0]
         else:
             return 0
@@ -373,7 +376,10 @@ class MFRC522:
 
         if len(backData) == 16:
             if pretty:
-                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA="".join(" {:>02X}".format(n) for n in backData[0:6]), dataAB="".join(" {:>02X}".format(n) for n in backData[6:10]), dataB="".join(" {:>02X}".format(n) for n in backData[10:16])))
+                dataA  = "".join(" {:>02X}".format(n) for n in backData[0:6])
+                dataAB = "".join(" {:>02X}".format(n) for n in backData[6:10])
+                dataB  = "".join(" {:>02X}".format(n) for n in backData[10:16])
+                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA=dataA, dataAB=dataAB, dataB=dataB))
             else:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
@@ -389,7 +395,7 @@ class MFRC522:
         if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
 
-        print(str(backLen) + " backdata &0x0F == 0x0A " + str(backData[0] & 0x0F))
+        # print(str(backLen) + " backdata &0x0F == 0x0A " + str(backData[0] & 0x0F))
         if status == self.MI_OK:
             i = 0
             buf = []
@@ -426,3 +432,18 @@ class MFRC522:
 
     def DumpClassic1K(self, key, uid):
         self.PrettyDumpClassic1K(key, uid, pretty=False)
+
+    def DumpClassic1K_Data(self, key, uid):
+        data = []
+        for i in range(4, 64, 4):
+            # Authenticate
+            status = self.Auth(self.PICC_AUTHENT1A, i, key, uid)
+
+            # Check if authenticated
+            if status == self.MI_OK:
+                data.append(self.Read(i))
+                data.append(self.Read(i + 1))
+                data.append(self.Read(i + 2))
+            else:
+                print("Authentication error")
+        return data
