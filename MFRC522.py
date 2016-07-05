@@ -124,6 +124,9 @@ class MFRC522:
         GPIO.output(self.NRSTPD, 1)
         self.Init()
 
+    def __del__(self):
+        GPIO.cleanup()
+
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
             return self.__colored_print__[0]
@@ -318,7 +321,7 @@ class MFRC522:
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
 
         if (status == self.MI_OK) and (backLen == 0x18):
-            print("Size: " + str(backData[0]))
+            # print("Size: " + str(backData[0]))
             return backData[0]
         else:
             return 0
@@ -392,7 +395,7 @@ class MFRC522:
         if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
 
-        print(str(backLen) + " backdata &0x0F == 0x0A " + str(backData[0] & 0x0F))
+        # print(str(backLen) + " backdata &0x0F == 0x0A " + str(backData[0] & 0x0F))
         if status == self.MI_OK:
             i = 0
             buf = []

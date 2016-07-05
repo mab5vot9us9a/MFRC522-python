@@ -51,18 +51,14 @@ if status == MIFAREReader.MI_OK:
     # Select the scanned tag
     MIFAREReader.SelectTag(uid)
 
-    block_number = 8
-
     # Authenticate
     status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, block_number, key, uid)
 
     # Check if authenticated
     if status == MIFAREReader.MI_OK:
-        MIFAREReader.Read(block_number)
+        data = MIFAREReader.DumpClassic1K_Data(key, uid)
     else:
         print("Authentication error")
-
-    data = MIFAREReader.DumpClassic1K_Data(key, uid)
 
     MIFAREReader.StopCrypto1()
 

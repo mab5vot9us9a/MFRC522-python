@@ -7,10 +7,28 @@ import signal
 
 continue_reading = True
 
-# Capture SIGINT for cleanup when the script is aborted
+
+data_blocks = [4, 5, 6,
+               8, 9, 10,
+               12, 13, 14,
+               16, 17, 18,
+               20, 21, 22,
+               24, 25, 26,
+               28, 29, 30,
+               32, 33, 34,
+               36, 37, 38,
+               40, 41, 42,
+               44, 45, 46,
+               48, 49, 50,
+               52, 53, 54,
+               56, 57, 58,
+               60, 61, 62]
 
 
 def end_read(signal, frame):
+    '''
+    Capture SIGINT for cleanup when the script is aborted
+    '''
     global continue_reading
     print("Ctrl+C captured, ending read.")
     continue_reading = False
@@ -49,7 +67,6 @@ while continue_reading:
 
         # Authenticate
         status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
-        print("\n")
 
         # Check if authenticated
         if status == MIFAREReader.MI_OK:
@@ -64,22 +81,20 @@ while continue_reading:
             print("Sector 8 looked like this:")
             # Read block 8
             MIFAREReader.Read(8)
-            print("\n")
 
             print("Sector 8 will now be filled with 0xFF:")
             # Write the data
             MIFAREReader.Write(8, data)
-            print("\n")
 
             print("It now looks like this:")
             # Check to see if it was written
             MIFAREReader.Read(8)
-            print("\n")
 
             # Stop
             MIFAREReader.StopCrypto1()
 
             # Make sure to stop reading for cards
             continue_reading = False
+            GPIO.cleanup()
         else:
             print("Authentication error")

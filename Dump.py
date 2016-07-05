@@ -54,7 +54,6 @@ while continue_reading:
         # DumpClassic1K(key, uid)
         MIFAREReader.PrettyDumpClassic1K(key, uid)
 
-        # Stop
         MIFAREReader.StopCrypto1()
 
         continue_reading = False
