@@ -125,7 +125,10 @@ class MFRC522:
         self.Init()
 
     def __del__(self):
-        GPIO.cleanup()
+        try:
+            GPIO.cleanup()
+        except RuntimeWarning:
+            pass
 
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
@@ -362,7 +365,7 @@ class MFRC522:
     def StopCrypto1(self):
         self.ClearBitMask(self.Status2Reg, 0x08)
 
-    def Read(self, blockAddr, pretty=False):
+    def Read(self, blockAddr, printData=False, prettyPrint=False):
         recvData = []
         recvData.append(self.PICC_READ)
         recvData.append(blockAddr)
@@ -375,12 +378,12 @@ class MFRC522:
             print("Error while reading!")
 
         if len(backData) == 16:
-            if pretty:
+            if prettyPrint:
                 dataA  = "".join(" {:>02X}".format(n) for n in backData[0:6])
                 dataAB = "".join(" {:>02X}".format(n) for n in backData[6:10])
                 dataB  = "".join(" {:>02X}".format(n) for n in backData[10:16])
                 print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA=dataA, dataAB=dataAB, dataB=dataB))
-            else:
+            elif printData:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
 
