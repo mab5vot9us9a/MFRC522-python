@@ -26,14 +26,14 @@ MIFAREReader = MFRC522.MFRC522()
 while continue_reading:
 
     # Scan for cards
-    (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+    (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print("Card detected")
 
     # Get the UID of the card
-    (status, uid) = MIFAREReader.MFRC522_Anticoll()
+    (status, uid) = MIFAREReader.Anticoll()
 
     # If we have the UID, continue
     if status == MIFAREReader.MI_OK:
@@ -45,10 +45,10 @@ while continue_reading:
         key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
 
         # Select the scanned tag
-        MIFAREReader.MFRC522_SelectTag(uid)
+        MIFAREReader.SelectTag(uid)
 
         # Authenticate
-        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
+        status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
         print("\n")
 
         # Check if authenticated
@@ -63,21 +63,21 @@ while continue_reading:
 
             print("Sector 8 looked like this:")
             # Read block 8
-            MIFAREReader.MFRC522_Read(8)
+            MIFAREReader.Read(8)
             print("\n")
 
             print("Sector 8 will now be filled with 0xFF:")
             # Write the data
-            MIFAREReader.MFRC522_Write(8, data)
+            MIFAREReader.Write(8, data)
             print("\n")
 
             print("It now looks like this:")
             # Check to see if it was written
-            MIFAREReader.MFRC522_Read(8)
+            MIFAREReader.Read(8)
             print("\n")
 
             # Stop
-            MIFAREReader.MFRC522_StopCrypto1()
+            MIFAREReader.StopCrypto1()
 
             # Make sure to stop reading for cards
             continue_reading = False

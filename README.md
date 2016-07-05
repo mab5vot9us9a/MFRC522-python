@@ -35,7 +35,7 @@ And then go to ```9 – Advanced Options``` > ```A5 SPI``` and enable the SPI in
 Reboot (```sudo shutdown -r now```).
 You can verify a successful configuration by entering
 ```
-$ ls /dev/spi*
+ls /dev/spi*
 ```
 The output should be similar to the following, thus confirming the existence of the necessary sockets.
 ```

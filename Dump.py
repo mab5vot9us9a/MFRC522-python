@@ -26,14 +26,14 @@ MIFAREReader = MFRC522.MFRC522()
 while continue_reading:
 
     # Scan for cards
-    (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+    (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print("Card detected")
 
     # Get the UID of the card
-    (status, uid) = MIFAREReader.MFRC522_Anticoll()
+    (status, uid) = MIFAREReader.Anticoll()
 
     # If we have the UID, continue
     if status == MIFAREReader.MI_OK:
@@ -45,17 +45,17 @@ while continue_reading:
         key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
 
         # Select the scanned tag
-        MIFAREReader.MFRC522_SelectTag(uid)
+        MIFAREReader.SelectTag(uid)
 
         # Dump the data
         # if your terminal can't display xterm256 colors, use either
-        # MFRC522_PrettyDumpClassic1K(key, uid, pretty=False)
+        # PrettyDumpClassic1K(key, uid, pretty=False)
         # or
-        # MFRC522_DumpClassic1K(key, uid)
-        MIFAREReader.MFRC522_PrettyDumpClassic1K(key, uid)
+        # DumpClassic1K(key, uid)
+        MIFAREReader.PrettyDumpClassic1K(key, uid)
 
         # Stop
-        MIFAREReader.MFRC522_StopCrypto1()
+        MIFAREReader.StopCrypto1()
 
         continue_reading = False
         GPIO.cleanup()

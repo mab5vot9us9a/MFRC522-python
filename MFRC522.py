@@ -7,6 +7,7 @@ import signal
 import time
 from xterm256_Colors import tcolors
 
+
 class MFRC522:
     NRSTPD = 22
 
@@ -107,15 +108,47 @@ class MFRC522:
     Reserved34      = 0x3F
 
     serNum = []
+    __default_block_print__ = "Block{color}{{:>3s}} |{{data}}"
+    __trailer_block_print__ = "Block{{:>3s}} |{color_A}{{data[0:6]}}{color_AB}{{data[6:10]}}{color_B}{{data[10:16]}}"
+    __colored_print__ = {
+        0: __default_block_print__.format(color=tcolors.RED_BRIGHT),
+        1: __default_block_print__.format(color=tcolors.BLUE_BRIGHT),
+        2: __trailer_block_print__.format(color_A=tcolors.GREEN_BRIGHT, color_AB=tcolors.PURPLE_BRIGHT, color_B=tcolors.ORANGE_BRIGHT),
+        3: __default_block_print__.format(color="")
+    }
 
     def __init__(self, dev='/dev/spidev0.0', spd=1000000):
         spi.openSPI(device=dev, speed=spd)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(22, GPIO.OUT)
         GPIO.output(self.NRSTPD, 1)
-        self.MFRC522_Init()
+        self.Init()
 
-    def MFRC522_Reset(self):
+    def __get_pretty_string__(self, block_number):
+        if block_number == 0:
+            return self.__colored_print__[0]
+        elif block_number == 1 or block_number == 2:
+            return self.__colored_print__[1]
+        elif block_number % 4 == 3:
+            return self.__colored_print__[2]
+        else:
+            return self.__colored_print__[3]
+
+    def Init(self):
+        GPIO.output(self.NRSTPD, 1)
+
+        self.Reset()
+
+        self.Write_MFRC522(self.TModeReg, 0x8D)
+        self.Write_MFRC522(self.TPrescalerReg, 0x3E)
+        self.Write_MFRC522(self.TReloadRegL, 30)
+        self.Write_MFRC522(self.TReloadRegH, 0)
+
+        self.Write_MFRC522(self.TxAutoReg, 0x40)
+        self.Write_MFRC522(self.ModeReg, 0x3D)
+        self.AntennaOn()
+
+    def Reset(self):
         self.Write_MFRC522(self.CommandReg, self.PCD_RESETPHASE)
 
     def Write_MFRC522(self, addr, val):
@@ -141,7 +174,7 @@ class MFRC522:
     def AntennaOff(self):
         self.ClearBitMask(self.TxControlReg, 0x03)
 
-    def MFRC522_ToCard(self, command, sendData):
+    def ToCard(self, command, sendData):
         backData = []
         backLen = 0
         status = self.MI_ERR
@@ -210,7 +243,7 @@ class MFRC522:
 
         return (status, backData, backLen)
 
-    def MFRC522_Request(self, reqMode):
+    def Request(self, reqMode):
         status = None
         backBits = None
         TagType = []
@@ -218,14 +251,14 @@ class MFRC522:
         self.Write_MFRC522(self.BitFramingReg, 0x07)
 
         TagType.append(reqMode)
-        (status, backData, backBits) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, TagType)
+        (status, backData, backBits) = self.ToCard(self.PCD_TRANSCEIVE, TagType)
 
         if ((status != self.MI_OK) | (backBits != 0x10)):
             status = self.MI_ERR
 
         return (status, backBits)
 
-    def MFRC522_Anticoll(self):
+    def Anticoll(self):
         backData = []
         serNumCheck = 0
 
@@ -236,7 +269,7 @@ class MFRC522:
         serNum.append(self.PICC_ANTICOLL)
         serNum.append(0x20)
 
-        (status, backData, backBits) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, serNum)
+        (status, backData, backBits) = self.ToCard(self.PCD_TRANSCEIVE, serNum)
 
         if(status == self.MI_OK):
             i = 0
@@ -270,7 +303,7 @@ class MFRC522:
         pOutData.append(self.Read_MFRC522(self.CRCResultRegM))
         return pOutData
 
-    def MFRC522_SelectTag(self, serNum):
+    def SelectTag(self, serNum):
         backData = []
         buf = []
         buf.append(self.PICC_SElECTTAG)
@@ -282,7 +315,7 @@ class MFRC522:
         pOut = self.CalulateCRC(buf)
         buf.append(pOut[0])
         buf.append(pOut[1])
-        (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, buf)
+        (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
 
         if (status == self.MI_OK) and (backLen == 0x18):
             print("Size: " + str(backData[0]))
@@ -290,7 +323,7 @@ class MFRC522:
         else:
             return 0
 
-    def MFRC522_Auth(self, authMode, BlockAddr, Sectorkey, serNum):
+    def Auth(self, authMode, BlockAddr, Sectorkey, serNum):
         buff = []
 
         # First byte should be the authMode (A or B)
@@ -312,7 +345,7 @@ class MFRC522:
             i = i + 1
 
         # Now we start the authentication itself
-        (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_AUTHENT, buff)
+        (status, backData, backLen) = self.ToCard(self.PCD_AUTHENT, buff)
 
         # Check if an error occurred
         if not(status == self.MI_OK):
@@ -323,32 +356,36 @@ class MFRC522:
         # Return the status
         return status
 
-    def MFRC522_StopCrypto1(self):
+    def StopCrypto1(self):
         self.ClearBitMask(self.Status2Reg, 0x08)
 
-    def MFRC522_Read(self, blockAddr):
+    def Read(self, blockAddr, pretty=False):
         recvData = []
         recvData.append(self.PICC_READ)
         recvData.append(blockAddr)
         pOut = self.CalulateCRC(recvData)
         recvData.append(pOut[0])
         recvData.append(pOut[1])
-        (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, recvData)
+        (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, recvData)
+
         if not(status == self.MI_OK):
             print("Error while reading!")
-        i = 0
+
         if len(backData) == 16:
-            print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
+            if pretty:
+                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
+            else:
+                print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
 
-    def MFRC522_Write(self, blockAddr, writeData):
+    def Write(self, blockAddr, writeData):
         buff = []
         buff.append(self.PICC_WRITE)
         buff.append(blockAddr)
         crc = self.CalulateCRC(buff)
         buff.append(crc[0])
         buff.append(crc[1])
-        (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, buff)
+        (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buff)
         if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
 
@@ -362,16 +399,16 @@ class MFRC522:
             crc = self.CalulateCRC(buf)
             buf.append(crc[0])
             buf.append(crc[1])
-            (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, buf)
+            (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
             if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
                 print("Error while writing")
             if status == self.MI_OK:
                 print("Data written")
 
-    def MFRC522_PrettyDumpClassic1K(self, key, uid, pretty=True):
+    def PrettyDumpClassic1K(self, key, uid, pretty=True):
         for i in range(0, 64, 4):
             # Authenticate
-            status = self.MFRC522_Auth(self.PICC_AUTHENT1A, i, key, uid)
+            status = self.Auth(self.PICC_AUTHENT1A, i, key, uid)
 
             # Check if authenticated
             if status == self.MI_OK:
@@ -380,26 +417,12 @@ class MFRC522:
                 else:
                     print("{:-^58}".format(" Sector {} ".format(i // 4)))
 
-                self.MFRC522_Read(i)
-                self.MFRC522_Read(i + 1)
-                self.MFRC522_Read(i + 2)
-                self.MFRC522_Read(i + 3)
+                self.Read(i, pretty)
+                self.Read(i + 1, pretty)
+                self.Read(i + 2, pretty)
+                self.Read(i + 3, pretty)
             else:
                 print("Authentication error")
 
-    def MFRC522_DumpClassic1K(self, key, uid):
-        self.MFRC522_PrettyDumpClassic1K(key, uid, pretty=False)
-
-    def MFRC522_Init(self):
-        GPIO.output(self.NRSTPD, 1)
-
-        self.MFRC522_Reset()
-
-        self.Write_MFRC522(self.TModeReg, 0x8D)
-        self.Write_MFRC522(self.TPrescalerReg, 0x3E)
-        self.Write_MFRC522(self.TReloadRegL, 30)
-        self.Write_MFRC522(self.TReloadRegH, 0)
-
-        self.Write_MFRC522(self.TxAutoReg, 0x40)
-        self.Write_MFRC522(self.ModeReg, 0x3D)
-        self.AntennaOn()
+    def DumpClassic1K(self, key, uid):
+        self.PrettyDumpClassic1K(key, uid, pretty=False)
