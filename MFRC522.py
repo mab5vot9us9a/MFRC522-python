@@ -373,7 +373,10 @@ class MFRC522:
 
         if len(backData) == 16:
             if pretty:
-                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA="".join(" {:>02X}".format(n) for n in backData[0:6]), dataAB="".join(" {:>02X}".format(n) for n in backData[6:10]), dataB="".join(" {:>02X}".format(n) for n in backData[10:16])))
+                dataA  = "".join(" {:>02X}".format(n) for n in backData[0:6])
+                dataAB = "".join(" {:>02X}".format(n) for n in backData[6:10])
+                dataB  = "".join(" {:>02X}".format(n) for n in backData[10:16])
+                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA=dataA, dataAB=dataAB, dataB=dataB))
             else:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
@@ -426,3 +429,18 @@ class MFRC522:
 
     def DumpClassic1K(self, key, uid):
         self.PrettyDumpClassic1K(key, uid, pretty=False)
+
+    def DumpClassic1K_Data(self):
+        data = []
+        for i in range(4, 64, 4):
+            # Authenticate
+            status = self.Auth(self.PICC_AUTHENT1A, i, key, uid)
+
+            # Check if authenticated
+            if status == self.MI_OK:
+                data.append(self.Read(i))
+                data.append(self.Read(i + 1))
+                data.append(self.Read(i + 2))
+            else:
+                print("Authentication error")
+        return data

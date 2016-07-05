@@ -63,3 +63,5 @@ while continue_reading:
             print("Authentication error")
 
         MIFAREReader.StopCrypto1()
+
+        print(MIFAREReader.DumpClassic1K_Data())
