@@ -108,8 +108,8 @@ class MFRC522:
     Reserved34      = 0x3F
 
     serNum = []
-    __default_block_print__ = "Block{color}{{:>3s}} |{{dataA}}{{dataAB}}{{dataB}}{end}"
-    __trailer_block_print__ = "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_B}{{dataB}}{end}"
+    __default_block_print__ = tcolors.GREY_50 + "Block{{:>3s}} |{color}{{dataA}}{{dataAB}}{{dataB}}{end}"
+    __trailer_block_print__ = tcolors.GREY_50 + "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_B}{{dataB}}{end}"
     __colored_print__ = {
         0: __default_block_print__.format(color=tcolors.RED_BRIGHT, end=tcolors.ENDC),
         1: __default_block_print__.format(color=tcolors.BLUE_BRIGHT, end=tcolors.ENDC),

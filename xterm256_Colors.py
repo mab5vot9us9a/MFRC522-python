@@ -15,6 +15,7 @@ class tcolors:
     ORANGE        = "\033[38;5;208m"
     ORANGE_BRIGHT = "\033[38;5;215m"
     YELLOW        = "\033[38;5;220m"
+    GREY_50       = "\033[38;5;244m"
     ENDC          = '\033[0m'
     BOLD          = '\033[1m'
     UNDERLINE     = '\033[4m'
