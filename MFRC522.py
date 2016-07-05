@@ -108,13 +108,13 @@ class MFRC522:
     Reserved34      = 0x3F
 
     serNum = []
-    __default_block_print__ = "Block{color}{{:>3s}} |{{data}}"
-    __trailer_block_print__ = "Block{{:>3s}} |{color_A}{{data[0:6]}}{color_AB}{{data[6:10]}}{color_B}{{data[10:16]}}"
+    __default_block_print__ = "Block{color}{{:>3s}} |{{dataA}}{{dataAB}}{{dataB}}{end}"
+    __trailer_block_print__ = "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_B}{{dataB}}{end}"
     __colored_print__ = {
-        0: __default_block_print__.format(color=tcolors.RED_BRIGHT),
-        1: __default_block_print__.format(color=tcolors.BLUE_BRIGHT),
-        2: __trailer_block_print__.format(color_A=tcolors.GREEN_BRIGHT, color_AB=tcolors.PURPLE_BRIGHT, color_B=tcolors.ORANGE_BRIGHT),
-        3: __default_block_print__.format(color="")
+        0: __default_block_print__.format(color=tcolors.RED_BRIGHT, end=tcolors.ENDC),
+        1: __default_block_print__.format(color=tcolors.BLUE_BRIGHT, end=tcolors.ENDC),
+        2: __trailer_block_print__.format(color_A=tcolors.GREEN_BRIGHT, color_AB=tcolors.PURPLE_BRIGHT, color_B=tcolors.ORANGE_BRIGHT, end=tcolors.ENDC),
+        3: __default_block_print__.format(color="", end="")
     }
 
     def __init__(self, dev='/dev/spidev0.0', spd=1000000):
@@ -373,7 +373,7 @@ class MFRC522:
 
         if len(backData) == 16:
             if pretty:
-                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), data="".join(" {:>02X}".format(n) for n in backData)))
+                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA="".join(" {:>02X}".format(n) for n in backData[0:6]), dataAB="".join(" {:>02X}".format(n) for n in backData[6:10]), dataB="".join(" {:>02X}".format(n) for n in backData[10:16])))
             else:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
