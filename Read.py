@@ -64,4 +64,4 @@ while continue_reading:
 
         MIFAREReader.StopCrypto1()
 
-        print(MIFAREReader.DumpClassic1K_Data())
+        print(MIFAREReader.DumpClassic1K_Data(key, uid))

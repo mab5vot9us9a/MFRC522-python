@@ -430,7 +430,7 @@ class MFRC522:
     def DumpClassic1K(self, key, uid):
         self.PrettyDumpClassic1K(key, uid, pretty=False)
 
-    def DumpClassic1K_Data(self):
+    def DumpClassic1K_Data(self, key, uid):
         data = []
         for i in range(4, 64, 4):
             # Authenticate
