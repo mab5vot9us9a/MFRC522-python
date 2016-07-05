@@ -426,10 +426,10 @@ class MFRC522:
                 else:
                     print("{:-^58}".format(" Sector {} ".format(i // 4)))
 
-                self.Read(i, pretty)
-                self.Read(i + 1, pretty)
-                self.Read(i + 2, pretty)
-                self.Read(i + 3, pretty)
+                self.Read(i, prettyPrint=pretty)
+                self.Read(i + 1, prettyPrint=pretty)
+                self.Read(i + 2, prettyPrint=pretty)
+                self.Read(i + 3, prettyPrint=pretty)
             else:
                 print("Authentication error")
 
