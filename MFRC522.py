@@ -371,19 +371,19 @@ class MFRC522:
     def MFRC522_PrettyDumpClassic1K(self, key, uid, pretty=True):
         for i in range(0, 64, 4):
             # Authenticate
-            status = self.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, i, key, uid)
+            status = self.MFRC522_Auth(self.PICC_AUTHENT1A, i, key, uid)
 
             # Check if authenticated
-            if status == MIFAREReader.MI_OK:
+            if status == self.MI_OK:
                 if pretty:
                     print("{}{:-^58}{}".format(tcolors.BLUE_BRIGHT, " Sector {} ".format(i // 4), tcolors.ENDC))
                 else:
                     print("{:-^58}".format(" Sector {} ".format(i // 4)))
 
-                MIFAREReader.MFRC522_Read(i)
-                MIFAREReader.MFRC522_Read(i + 1)
-                MIFAREReader.MFRC522_Read(i + 2)
-                MIFAREReader.MFRC522_Read(i + 3)
+                self.MFRC522_Read(i)
+                self.MFRC522_Read(i + 1)
+                self.MFRC522_Read(i + 2)
+                self.MFRC522_Read(i + 3)
             else:
                 print("Authentication error")
 
