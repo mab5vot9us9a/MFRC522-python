@@ -28,3 +28,6 @@ You can use [this](http://i.imgur.com/y7Fnvhq.png) image for reference.
 
 ##Usage
 Import the class by importing MFRC522 in the top of your script. For more info see the examples.
+
+# Disclaimer
+Original source: https://github.com/mxgxw/MFRC522-python.
