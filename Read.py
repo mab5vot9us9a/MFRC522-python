@@ -4,7 +4,6 @@
 import RPi.GPIO as GPIO
 import MFRC522
 import signal
-from xterm256_Colors import tcolors
 
 continue_reading = True
 

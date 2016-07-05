@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import spi
 import signal
 import time
-
+from xterm256_Colors import tcolors
 
 class MFRC522:
     NRSTPD = 22
