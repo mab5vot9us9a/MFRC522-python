@@ -4,21 +4,7 @@
 import RPi.GPIO as GPIO
 import MFRC522
 import signal
-
-
-class bcolors:
-    CYAN         = '\033[96m'
-    CYAN_BRIGHT  = '\033[96;1m'
-    HEADER       = '\033[95m'
-    BLUE         = '\033[94m'
-    BLUE_BRIGHT  = '\033[94;1m'
-    GREEN        = '\033[92m'
-    GREEN_BRIGHT = '\033[92;1m'
-    WARNING      = '\033[93;1m'
-    FAIL         = '\033[91m'
-    ENDC         = '\033[0m'
-    BOLD         = '\033[1m'
-    UNDERLINE    = '\033[4m'
+from xterm256_Colors import tcolors
 
 continue_reading = True
 
@@ -66,21 +52,15 @@ while continue_reading:
         # Select the scanned tag
         MIFAREReader.MFRC522_SelectTag(uid)
 
-        for i in range(0, 64, 4):
-            # Authenticate
-            status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, i, key, uid)
+        block_number = 8
 
-            # Check if authenticated
-            if status == MIFAREReader.MI_OK:
-                print("{}{:-^58}{}".format(bcolors.BLUE_BRIGHT, " Sector {} ".format(i // 4), bcolors.ENDC))
-                MIFAREReader.MFRC522_Read(i)
-                MIFAREReader.MFRC522_Read(i + 1)
-                MIFAREReader.MFRC522_Read(i + 2)
-                MIFAREReader.MFRC522_Read(i + 3)
-            else:
-                print("Authentication error")
+        # Authenticate
+        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, block_number, key, uid)
 
-        continue_reading = False
+        # Check if authenticated
+        if status == MIFAREReader.MI_OK:
+            MIFAREReader.MFRC522_Read(block_number)
+        else:
+            print("Authentication error")
+
         MIFAREReader.MFRC522_StopCrypto1()
-
-GPIO.cleanup()
