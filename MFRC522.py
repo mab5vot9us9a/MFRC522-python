@@ -413,7 +413,7 @@ class MFRC522:
             # Check if authenticated
             if status == self.MI_OK:
                 if pretty:
-                    print("{}{:-^58}{}".format(tcolors.BLUE_BRIGHT, " Sector {} ".format(i // 4), tcolors.ENDC))
+                    print("{}{:-^58}{}".format(tcolors.YELLOW, " Sector {} ".format(i // 4), tcolors.ENDC))
                 else:
                     print("{:-^58}".format(" Sector {} ".format(i // 4)))
 
