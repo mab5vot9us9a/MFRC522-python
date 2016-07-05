@@ -62,6 +62,6 @@ while continue_reading:
         else:
             print("Authentication error")
 
-        MIFAREReader.StopCrypto1()
-
         print(MIFAREReader.DumpClassic1K_Data(key, uid))
+
+        MIFAREReader.StopCrypto1()
