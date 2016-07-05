@@ -368,16 +368,27 @@ class MFRC522:
             if status == self.MI_OK:
                 print("Data written")
 
-    def MFRC522_DumpClassic1K(self, key, uid):
-        i = 0
-        while i < 64:
-            status = self.MFRC522_Auth(self.PICC_AUTHENT1A, i, key, uid)
+    def MFRC522_PrettyDumpClassic1K(self, key, uid, pretty=True):
+        for i in range(0, 64, 4):
+            # Authenticate
+            status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, i, key, uid)
+
             # Check if authenticated
-            if status == self.MI_OK:
-                self.MFRC522_Read(i)
+            if status == MIFAREReader.MI_OK:
+                if pretty:
+                    print("{}{:-^58}{}".format(tcolors.BLUE_BRIGHT, " Sector {} ".format(i // 4), tcolors.ENDC))
+                else:
+                    print("{:-^58}".format(" Sector {} ".format(i // 4)))
+
+                MIFAREReader.MFRC522_Read(i)
+                MIFAREReader.MFRC522_Read(i + 1)
+                MIFAREReader.MFRC522_Read(i + 2)
+                MIFAREReader.MFRC522_Read(i + 3)
             else:
                 print("Authentication error")
-            i = i + 1
+
+    def MFRC522_DumpClassic1K(self, key, uid):
+        self.MFRC522_PrettyDumpClassic1K(key, uid, pretty=False)
 
     def MFRC522_Init(self):
         GPIO.output(self.NRSTPD, 1)

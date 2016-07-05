@@ -48,7 +48,14 @@ while continue_reading:
         MIFAREReader.MFRC522_SelectTag(uid)
 
         # Dump the data
-        MIFAREReader.MFRC522_DumpClassic1K(key, uid)
+        # if your terminal can't display xterm256 colors, use either
+        # MFRC522_PrettyDumpClassic1K(key, uid, pretty=False)
+        # or
+        # MFRC522_DumpClassic1K(key, uid)
+        MIFAREReader.MFRC522_PrettyDumpClassic1K(key, uid)
 
         # Stop
         MIFAREReader.MFRC522_StopCrypto1()
+
+        continue_reading = False
+        GPIO.cleanup()
