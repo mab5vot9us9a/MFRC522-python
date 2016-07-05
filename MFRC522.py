@@ -124,12 +124,6 @@ class MFRC522:
         GPIO.output(self.NRSTPD, 1)
         self.Init()
 
-    def __del__(self):
-        try:
-            GPIO.cleanup()
-        except RuntimeWarning:
-            pass
-
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
             return self.__colored_print__[0]
