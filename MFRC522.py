@@ -114,7 +114,7 @@ class MFRC522:
         0: __default_block_print__.format(color=tcolors.RED_BRIGHT, end=tcolors.ENDC),
         1: __default_block_print__.format(color=tcolors.BLUE_BRIGHT, end=tcolors.ENDC),
         2: __trailer_block_print__.format(color_A=tcolors.GREEN_BRIGHT, color_AB=tcolors.PURPLE_BRIGHT, color_B=tcolors.ORANGE_BRIGHT, end=tcolors.ENDC),
-        3: __default_block_print__.format(color="", end="")
+        3: __default_block_print__.format(color=tcolors.ENDC, end="")
     }
 
     def __init__(self, dev='/dev/spidev0.0', spd=1000000):
