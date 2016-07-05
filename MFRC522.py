@@ -373,7 +373,7 @@ class MFRC522:
 
         if len(backData) == 16:
             if pretty:
-                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
+                print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), data="".join(" {:>02X}".format(n) for n in backData)))
             else:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
