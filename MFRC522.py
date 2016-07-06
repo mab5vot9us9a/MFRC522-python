@@ -375,7 +375,7 @@ class MFRC522:
             if prettyPrint:
                 dataA  = "".join(" {:>02X}".format(n) for n in backData[0:6])
                 dataAB = "".join(" {:>02X}".format(n) for n in backData[6:9])
-                dataP = "".join(" {:>02X}".format(n) for n in backData[9])
+                dataP = "".join(" {:>02X}".format(backData[9]))
                 dataB  = "".join(" {:>02X}".format(n) for n in backData[10:16])
                 print(self.__get_pretty_string__(blockAddr).format(str(blockAddr), dataA=dataA, dataAB=dataAB, dataP=dataP, dataB=dataB))
             elif printData:
