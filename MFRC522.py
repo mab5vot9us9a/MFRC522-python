@@ -410,6 +410,14 @@ class MFRC522:
                 print("Data written")
 
     def PrettyDumpClassic1K(self, key, uid, pretty=True):
+        """
+        Dumps all blocks to the console. Coloring is inspired by https://en.wikipedia.org/wiki/File:MiFare_Byte_Layout.png.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+            pretty (boolean): Whether or not to print to console using colors. Defaults to `True`.
+        """
         for i in range(0, 64, 4):
             # Authenticate
             status = self.Auth(self.PICC_AUTHENT1A, i, key, uid)
@@ -429,9 +437,26 @@ class MFRC522:
                 print("Authentication error")
 
     def DumpClassic1K(self, key, uid):
+        """
+        Dumps all blocks to the console.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+        """
         self.PrettyDumpClassic1K(key, uid, pretty=False)
 
     def DumpClassic1K_Data(self, key, uid):
+        """
+        Dumps only DATA blocks. The first sector as well as all sector trailer blocks are ommitted.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+
+        Returns:
+            [[uint8]]: The complete data dump. The first index describes the data block in order, the second the byte of that block.
+        """
         data = []
         for i in range(4, 64, 4):
             # Authenticate
