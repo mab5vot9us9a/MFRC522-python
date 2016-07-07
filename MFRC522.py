@@ -10,6 +10,22 @@ from xterm256_Colors import tcolors
 
 
 class MFRC522:
+    """
+    Class to communicate with a MIFARE 1k Classic style tag layout.
+
+    To take any action with the card, the following is a standard workflow:
+    ```
+    MIFAREReader = MFRC522()
+    (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
+    (status, uid) = MIFAREReader.Anticoll()
+    MIFAREReader.SelectTag(uid)
+    # Now comes the action like .Write(blockAddr, data)
+    ```
+
+    Args:
+        dev (string): The socket to use. "/dev/spidev0.0" by default.
+        spd (int): The speed at which to clock. 1000000 by default.
+    """
     NRSTPD = 22
 
     MAX_LEN = 16
@@ -124,6 +140,7 @@ class MFRC522:
                    56, 57, 58,
                    60, 61, 62]
     serNum = []
+
     __default_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color}{{dataA}}{{dataAB}}{{dataP}}{{dataB}}{end}"
     __trailer_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_P}{{dataP}}{color_B}{{dataB}}{end}"
     __colored_print__ = {
@@ -437,7 +454,6 @@ class MFRC522:
 
             if status == self.MI_OK:
                 all_values = [value for _ in range(0, 16)]
-                print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(all_values, i=i))
                 self.Write(self.data_blocks[i], all_values)
                 self.Write(self.data_blocks[i + 1], all_values)
                 self.Write(self.data_blocks[i + 2], all_values)
