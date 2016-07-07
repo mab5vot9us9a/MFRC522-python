@@ -432,18 +432,18 @@ class MFRC522:
         if not isinstance(value, int) or value > 255:
             raise errors.InvalidValueException("Invalid value to write to all data blocks.")
 
-            for i in range(0, len(self.data_blocks), 3):
-                status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
+        for i in range(0, len(self.data_blocks), 3):
+            status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
 
-                if status == self.MI_OK:
-                    all_values = [value for _ in range(0, 16)]
-                    print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(all_values, i=i))
-                    self.Write(self.data_blocks[i], all_values)
-                    self.Write(self.data_blocks[i + 1], all_values)
-                    self.Write(self.data_blocks[i + 2], all_values)
-                else:
-                    print("Authentication error")
-                    raise errors.AuthenticationException
+            if status == self.MI_OK:
+                all_values = [value for _ in range(0, 16)]
+                print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(all_values, i=i))
+                self.Write(self.data_blocks[i], all_values)
+                self.Write(self.data_blocks[i + 1], all_values)
+                self.Write(self.data_blocks[i + 2], all_values)
+            else:
+                print("Authentication error")
+                raise errors.AuthenticationException
 
     def PrettyDumpClassic1K(self, key, uid, pretty=True):
         """
