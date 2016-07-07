@@ -10,7 +10,7 @@ MIFAREReader = MFRC522.MFRC522()
 if status == MIFAREReader.MI_OK:
     key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
     MIFAREReader.SelectTag(uid)
-    MIFAREReader.WriteAll(ord("A"))
+    MIFAREReader.WriteAll(key, uid, ord("A"))
     print("Wrote " + str(ord("A")))
 
     key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
