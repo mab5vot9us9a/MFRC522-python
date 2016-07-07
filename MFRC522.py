@@ -5,6 +5,7 @@ import RPi.GPIO as GPIO
 import spi
 import signal
 import time
+import errors
 from xterm256_Colors import tcolors
 
 
@@ -107,6 +108,21 @@ class MFRC522:
     Reserved33      = 0x3E
     Reserved34      = 0x3F
 
+    data_blocks = [4, 5, 6,
+                   8, 9, 10,
+                   12, 13, 14,
+                   16, 17, 18,
+                   20, 21, 22,
+                   24, 25, 26,
+                   28, 29, 30,
+                   32, 33, 34,
+                   36, 37, 38,
+                   40, 41, 42,
+                   44, 45, 46,
+                   48, 49, 50,
+                   52, 53, 54,
+                   56, 57, 58,
+                   60, 61, 62]
     serNum = []
     __default_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color}{{dataA}}{{dataAB}}{{dataP}}{{dataB}}{end}"
     __trailer_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_P}{{dataP}}{color_B}{{dataB}}{end}"
@@ -409,6 +425,29 @@ class MFRC522:
             if status == self.MI_OK:
                 print("Data written")
 
+    def WriteAll(self, value):
+        if not isinstance(value, int) or value > 255:
+            raise errors.InvalidValueException("Invalid value to write to all data blocks.")
+        (status, TagType) = self.Request(self.PICC_REQIDL)
+        (status, uid) = self.Anticoll()
+        if status == self.MI_OK:
+            key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+            self.SelectTag(uid)
+
+            for i in range(0, len(self.data_blocks), 3):
+                status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
+
+                if status == self.MI_OK:
+                    all_values = [value for _ in range(0, 16)]
+                    self.Write(self.data_blocks[i], all_values)
+                    self.Write(self.data_blocks[i + 1], all_values)
+                    self.Write(self.data_blocks[i + 2], all_values)
+                else:
+                    print("Authentication error")
+                    raise errors.AuthenticationException
+
+            self.StopCrypto1()
+
     def PrettyDumpClassic1K(self, key, uid, pretty=True):
         """
         Dumps all blocks to the console. Coloring is inspired by https://en.wikipedia.org/wiki/File:MiFare_Byte_Layout.png.
@@ -435,6 +474,7 @@ class MFRC522:
                 self.Read(i + 3, prettyPrint=pretty)
             else:
                 print("Authentication error")
+                raise errors.AuthenticationException
 
     def DumpClassic1K(self, key, uid):
         """
@@ -469,4 +509,13 @@ class MFRC522:
                 data.append(self.Read(i + 2))
             else:
                 print("Authentication error")
+                raise errors.AuthenticationException
         return data
+
+    def DumpClassic1K_Text(self, key, uid):
+        data = self.DumpClassic1K_Data(key, uid)
+        for block in data:
+            b = ""
+            for byte in block:
+                b += chr(byte)
+            print(b)
