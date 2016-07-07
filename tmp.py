@@ -6,7 +6,7 @@ import MFRC522
 MIFAREReader = MFRC522.MFRC522()
 
 (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
-print("TagType=" + TagType)
+print("TagType={:X}".format(TagType))
 (status, uid) = MIFAREReader.Anticoll()
 if status == MIFAREReader.MI_OK:
     key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
