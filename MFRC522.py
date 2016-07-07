@@ -158,7 +158,6 @@ class MFRC522:
         self.Init()
 
     def __del__(self):
-        print("Cleaning up GPIO.")
         GPIO.cleanup()
 
     def __get_pretty_string__(self, block_number):
