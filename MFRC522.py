@@ -141,7 +141,6 @@ class MFRC522:
         self.Init()
 
     def __deinit__(self):
-        self.StopCrypto1()
         GPIO.cleanup()
 
     def __get_pretty_string__(self, block_number):
