@@ -157,7 +157,7 @@ class MFRC522:
         GPIO.output(self.NRSTPD, 1)
         self.Init()
 
-    def __deinit__(self):
+    def __del__(self):
         print("Cleaning up GPIO.")
         GPIO.cleanup()
 
