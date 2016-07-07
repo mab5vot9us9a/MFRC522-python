@@ -442,7 +442,7 @@ class MFRC522:
 
                 if status == self.MI_OK:
                     all_values = [value for _ in range(0, 16)]
-                    print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(i=i, all_values))
+                    print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(all_values, i=i))
                     self.Write(self.data_blocks[i], all_values)
                     self.Write(self.data_blocks[i + 1], all_values)
                     self.Write(self.data_blocks[i + 2], all_values)
