@@ -428,14 +428,9 @@ class MFRC522:
             if status == self.MI_OK:
                 print("Data written")
 
-    def WriteAll(self, value):
+    def WriteAll(self, key, uid, value):
         if not isinstance(value, int) or value > 255:
             raise errors.InvalidValueException("Invalid value to write to all data blocks.")
-        (status, TagType) = self.Request(self.PICC_REQIDL)
-        (status, uid) = self.Anticoll()
-        if status == self.MI_OK:
-            key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-            self.SelectTag(uid)
 
             for i in range(0, len(self.data_blocks), 3):
                 status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
