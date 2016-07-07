@@ -517,5 +517,5 @@ class MFRC522:
         for block in data:
             b = ""
             for byte in block:
-                b += chr(byte)
+                b += chr(byte) if byte > 32 else "."
             print(b)
