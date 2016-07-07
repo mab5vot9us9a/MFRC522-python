@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-import RPi.GPIO as GPIO
 import MFRC522
 import signal
 
@@ -32,7 +31,6 @@ def end_read(signal, frame):
     global continue_reading
     print("Ctrl+C captured, ending read.")
     continue_reading = False
-    GPIO.cleanup()
 
 # Hook the SIGINT
 signal.signal(signal.SIGINT, end_read)
@@ -95,6 +93,5 @@ while continue_reading:
 
             # Make sure to stop reading for cards
             continue_reading = False
-            GPIO.cleanup()
         else:
             print("Authentication error")

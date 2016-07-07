@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-import RPi.GPIO as GPIO
 import MFRC522
 
 MIFAREReader = MFRC522.MFRC522()
@@ -12,3 +11,4 @@ if status == MIFAREReader.MI_OK:
     MIFAREReader.SelectTag(uid)
     MIFAREReader.WriteAll(ord("A"))
     print("Wrote " + str(ord("A")))
+    MIFAREReader.DumpClassic1K_Text(key, uid)

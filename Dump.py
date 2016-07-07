@@ -58,4 +58,3 @@ while continue_reading:
         MIFAREReader.StopCrypto1()
 
         continue_reading = False
-        GPIO.cleanup()

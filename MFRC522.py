@@ -140,6 +140,9 @@ class MFRC522:
         GPIO.output(self.NRSTPD, 1)
         self.Init()
 
+    def __deinit__(self):
+        GPIO.cleanup()
+
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
             return self.__colored_print__[0]
@@ -439,6 +442,7 @@ class MFRC522:
 
                 if status == self.MI_OK:
                     all_values = [value for _ in range(0, 16)]
+                    print("ALL VALUES: {} to {i}, {i}+1, {i}+2".format(i=i, all_values))
                     self.Write(self.data_blocks[i], all_values)
                     self.Write(self.data_blocks[i + 1], all_values)
                     self.Write(self.data_blocks[i + 2], all_values)
