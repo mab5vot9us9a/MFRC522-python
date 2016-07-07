@@ -141,6 +141,7 @@ class MFRC522:
         self.Init()
 
     def __deinit__(self):
+        self.StopCrypto1()
         GPIO.cleanup()
 
     def __get_pretty_string__(self, block_number):
@@ -449,8 +450,6 @@ class MFRC522:
                 else:
                     print("Authentication error")
                     raise errors.AuthenticationException
-
-            self.StopCrypto1()
 
     def PrettyDumpClassic1K(self, key, uid, pretty=True):
         """
