@@ -5,10 +5,32 @@ import RPi.GPIO as GPIO
 import spi
 import signal
 import time
+import errors
 from xterm256_Colors import tcolors
 
 
 class MFRC522:
+    """
+    Class to communicate with a MIFARE 1k Classic style tag layout.
+
+    To take any action with the card, the following is a standard workflow:
+    ```
+    MIFAREReader = MFRC522()
+    (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
+    (status, uid) = MIFAREReader.Anticoll()
+    if status == MI_OK:
+        MIFAREReader.SelectTag(uid)
+        status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, blockAddr, key, uid)
+        if status == MIFAREReader.MI_OK:
+            # Now comes the action like .Write(blockAddr, data)
+    ```
+    Actions that read/write to multiple sectors can ommit the authentication part, since
+    it is done internally multiple times for the different sectors.
+
+    Args:
+        dev (string): The socket to use. "/dev/spidev0.0" by default.
+        spd (int): The speed at which to clock. 1000000 by default.
+    """
     NRSTPD = 22
 
     MAX_LEN = 16
@@ -107,7 +129,23 @@ class MFRC522:
     Reserved33      = 0x3E
     Reserved34      = 0x3F
 
+    data_blocks = [4, 5, 6,
+                   8, 9, 10,
+                   12, 13, 14,
+                   16, 17, 18,
+                   20, 21, 22,
+                   24, 25, 26,
+                   28, 29, 30,
+                   32, 33, 34,
+                   36, 37, 38,
+                   40, 41, 42,
+                   44, 45, 46,
+                   48, 49, 50,
+                   52, 53, 54,
+                   56, 57, 58,
+                   60, 61, 62]
     serNum = []
+
     __default_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color}{{dataA}}{{dataAB}}{{dataP}}{{dataB}}{end}"
     __trailer_block_print__ = tcolors.GRAY_50 + "Block{{:>3s}} |{color_A}{{dataA}}{color_AB}{{dataAB}}{color_P}{{dataP}}{color_B}{{dataB}}{end}"
     __colored_print__ = {
@@ -123,6 +161,9 @@ class MFRC522:
         GPIO.setup(22, GPIO.OUT)
         GPIO.output(self.NRSTPD, 1)
         self.Init()
+
+    def __del__(self):
+        GPIO.cleanup()
 
     def __get_pretty_string__(self, block_number):
         if block_number == 0:
@@ -308,22 +349,25 @@ class MFRC522:
         buf = []
         buf.append(self.PICC_SElECTTAG)
         buf.append(0x70)
-        i = 0
-        while i < 5:
-            buf.append(serNum[i])
-            i = i + 1
+        buf += serNum[0:5]
         pOut = self.CalulateCRC(buf)
-        buf.append(pOut[0])
-        buf.append(pOut[1])
+        buf += pOut
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
 
         if (status == self.MI_OK) and (backLen == 0x18):
-            # print("Size: " + str(backData[0]))
             return backData[0]
         else:
             return 0
 
     def Auth(self, authMode, BlockAddr, Sectorkey, serNum):
+        """
+        Authenticate with the tag. After a successful authentication you are
+        authorized (according to the access bits) for the whole sector.
+        You only need to reauthenticate when you are switching sectors.
+
+        Returns:
+            int: The status of the authentication. Either one of .MI_OK, .MI_NOTAGERR, .MI_ERR.
+        """
         buff = []
 
         # First byte should be the authMode (A or B)
@@ -333,16 +377,10 @@ class MFRC522:
         buff.append(BlockAddr)
 
         # Now we need to append the authKey which usually is 6 bytes of 0xFF
-        i = 0
-        while(i < len(Sectorkey)):
-            buff.append(Sectorkey[i])
-            i = i + 1
-        i = 0
+        buff += Sectorkey[0:len(Sectorkey)]
 
         # Next we append the first 4 bytes of the UID
-        while(i < 4):
-            buff.append(serNum[i])
-            i = i + 1
+        buff += serNum[0:4]
 
         # Now we start the authentication itself
         (status, backData, backLen) = self.ToCard(self.PCD_AUTHENT, buff)
@@ -360,12 +398,22 @@ class MFRC522:
         self.ClearBitMask(self.Status2Reg, 0x08)
 
     def Read(self, blockAddr, printData=False, prettyPrint=False):
+        """
+        Read data from a block of the tag.
+
+        Args:
+            blockAddr (uint8): The address of the block to read from.
+            printData (boolean): Whether or not to print the read data to the console. False by default.
+            prettyPrint (boolean): Whether or not to print the read data using xterm256 colors. False by default. If set to True, implicitly sets printData to True.
+
+        Returns:
+            [uint8]: The data read from the defined block.
+        """
         recvData = []
         recvData.append(self.PICC_READ)
         recvData.append(blockAddr)
         pOut = self.CalulateCRC(recvData)
-        recvData.append(pOut[0])
-        recvData.append(pOut[1])
+        recvData += pOut
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, recvData)
 
         if not(status == self.MI_OK):
@@ -381,14 +429,21 @@ class MFRC522:
             elif printData:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
+        return None
 
     def Write(self, blockAddr, writeData):
+        """
+        Write data to a block on the tag.
+
+        Args:
+            blockAddr (uint8): The address of the block to write to.
+            writeData ([uint8]): The data to write to the defined block.
+        """
         buff = []
         buff.append(self.PICC_WRITE)
         buff.append(blockAddr)
         crc = self.CalulateCRC(buff)
-        buff.append(crc[0])
-        buff.append(crc[1])
+        buff += crc
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buff)
         if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
@@ -401,13 +456,70 @@ class MFRC522:
                 buf.append(writeData[i])
                 i = i + 1
             crc = self.CalulateCRC(buf)
-            buf.append(crc[0])
-            buf.append(crc[1])
+            buf += crc
             (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
             if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
                 print("Error while writing")
+
+    def WriteAll(self, key, uid, value):
+        """
+        Writes the passed value to all data blocks. By using 0x00 as value, you
+        can effectively reset the tag to its factory values in regards to the data
+        blocks. Sector trailers as well as the first sector are not affected.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+            value (uint8): The value to be written to all data blocks.
+        """
+        if not isinstance(value, int) or value > 255:
+            raise errors.InvalidValueException("Invalid value to write to all data blocks.")
+
+        for i in range(0, len(self.data_blocks), 3):
+            status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
+
             if status == self.MI_OK:
-                print("Data written")
+                all_values = [value for _ in range(0, 16)]
+                self.Write(self.data_blocks[i], all_values)
+                self.Write(self.data_blocks[i + 1], all_values)
+                self.Write(self.data_blocks[i + 2], all_values)
+
+    def WriteText(self, key, uid, text):
+        """
+        Writes a passed string in sequential order onto the tag. Starting at the first data block (meaning block #4), existing data is overwritten. Writing always happens in units of one block. If the trailing end of the passed string does not fill a block, the remaining bytes are padded with 0x00.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+            text (string): The string to be written.
+
+        Raises:
+            errors.TextTooLongException: If the text takes up more space than there are data blocks available.
+        """
+        text_length = len(text)
+        if text_length > len(self.data_blocks) * 16:
+            raise errors.TextTooLongException
+
+        block_data = []
+        blocks = text_length // 16
+        remainder_block = text_length % 16
+        text = [ord(x) for x in text]
+        for i in range(0, blocks):
+            block_data.append(text[0:16])
+            del text[0:16]
+        if len(text) > 0:
+            text += [0x00 for _ in range(0, 16 - len(text))]
+            block_data.append(text)
+
+        status = None
+        for i in range(0, len(block_data)):
+            if self.data_blocks[i] % 4 == 0:
+                status = self.Auth(self.PICC_AUTHENT1A, self.data_blocks[i], key, uid)
+
+            if status == self.MI_OK:
+                self.Write(self.data_blocks[i], block_data[i])
+            else:
+                print("Authentication error")
 
     def PrettyDumpClassic1K(self, key, uid, pretty=True):
         """
@@ -435,6 +547,7 @@ class MFRC522:
                 self.Read(i + 3, prettyPrint=pretty)
             else:
                 print("Authentication error")
+                raise errors.AuthenticationException
 
     def DumpClassic1K(self, key, uid):
         """
@@ -469,4 +582,29 @@ class MFRC522:
                 data.append(self.Read(i + 2))
             else:
                 print("Authentication error")
+                raise errors.AuthenticationException
         return data
+
+    def DumpClassic1K_Text(self, key, uid, print_text=True):
+        """
+        Dumps only DATA blocks. The data in each block is interpreted as string according to pythons ```chr(value)```.
+
+        Args:
+            key ([uint8]): Key A of the sector trailer block.
+            uid ([uint8]): The 4 byte uid of the card/tag.
+
+        Returns:
+            string: All the data on the tag interpreted as a single string.
+        """
+        data = self.DumpClassic1K_Data(key, uid)
+        text = ""
+        for block in data:
+            b_print = ""
+            for byte in block:
+                if print_text:
+                    b_print += chr(byte) if byte >= 32 else "."
+                text += chr(byte)
+            if print_text:
+                print(b_print)
+
+        return text

@@ -53,8 +53,8 @@ while continue_reading:
         # or
         # DumpClassic1K(key, uid)
         MIFAREReader.PrettyDumpClassic1K(key, uid)
+        MIFAREReader.DumpClassic1K_Text(key, uid)
 
         MIFAREReader.StopCrypto1()
 
         continue_reading = False
-        GPIO.cleanup()
