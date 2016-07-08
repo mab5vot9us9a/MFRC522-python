@@ -1,5 +1,8 @@
 MFRC522-python
 ==============
+A small class to interface with the NFC reader Module MFRC522 on the Raspberry Pi.
+
+This is a Python port of the example code for the NFC module RF522-AN.
 
 ## Table of Contents
 1. [Install on Raspberry Pi running Jessie](#install-on-raspberry-pi-running-jessie-)
@@ -7,10 +10,6 @@ MFRC522-python
 3. [Usage](#usage)
 4. [Useful Resources](#useful-resources)
 5. [Disclaimer](#disclaimer)
-
-A small class to interface with the NFC reader Module MFRC522 on the Raspberry Pi.
-
-This is a Python port of the example code for the NFC module RF522-AN.
 
 ## Install on Raspberry Pi running **Jessie**
 ### 0 – Latest Kernel
