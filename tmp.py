@@ -11,8 +11,8 @@ print("TagType={:X}".format(TagType))
 if status == MIFAREReader.MI_OK:
     key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
     MIFAREReader.SelectTag(uid)
-    MIFAREReader.WriteAll(key, uid, ord("B"))
-    print("Wrote " + str(ord("B")))
+    MIFAREReader.WriteAll(key, uid, 0x00
+    print("Wrote " + str(0x00)
 
     key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
     MIFAREReader.DumpClassic1K_Text(key, uid)
