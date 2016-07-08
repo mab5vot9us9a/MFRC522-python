@@ -407,8 +407,7 @@ class MFRC522:
         recvData.append(self.PICC_READ)
         recvData.append(blockAddr)
         pOut = self.CalulateCRC(recvData)
-        recvData.append(pOut[0])
-        recvData.append(pOut[1])
+        recvData += pOut
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, recvData)
 
         if not(status == self.MI_OK):
@@ -424,14 +423,14 @@ class MFRC522:
             elif printData:
                 print("Block{:>3s} |{}".format(str(blockAddr), "".join(" {:>02X}".format(n) for n in backData)))
             return backData
+        return None
 
     def Write(self, blockAddr, writeData):
         buff = []
         buff.append(self.PICC_WRITE)
         buff.append(blockAddr)
         crc = self.CalulateCRC(buff)
-        buff.append(crc[0])
-        buff.append(crc[1])
+        buff += crc
         (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buff)
         if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
             status = self.MI_ERR
@@ -444,8 +443,7 @@ class MFRC522:
                 buf.append(writeData[i])
                 i = i + 1
             crc = self.CalulateCRC(buf)
-            buf.append(crc[0])
-            buf.append(crc[1])
+            buf += crc
             (status, backData, backLen) = self.ToCard(self.PCD_TRANSCEIVE, buf)
             if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
                 print("Error while writing")
