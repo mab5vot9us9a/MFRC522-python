@@ -1,6 +1,13 @@
 MFRC522-python
 ==============
 
+# Table of Contents
+1. [Install on Raspberry Pi running Jessie](#install-on-raspberry-pi-running-jessie-)
+2. [Install on Raspberry Pi running Wheezy](#install-on-raspberry-pi-running-wheezy-)
+3. [Usage](#usage)
+4. [Useful Resources](#useful-resources)
+5. [Disclaimer](#disclaimer)
+
 A small class to interface with the NFC reader Module MFRC522 on the Raspberry Pi.
 
 This is a Python port of the example code for the NFC module RF522-AN.
@@ -71,6 +78,10 @@ Follow these instructions: [RASPBERRY PI RFID RC522 TAGS AUSLESEN (NFC)](http://
 
 ## Usage
 Import the class by importing MFRC522 in the top of your script. For more info see the examples.
+
+## Useful Resources
+- [MiFare Byte Layout](https://en.wikipedia.org/wiki/File:MiFare_Byte_Layout.png#file)
+- [MIFARE Classic EV1 1K Data Sheet](http://cache.nxp.com/documents/data_sheet/MF1S50YYX_V1.pdf)
 
 # Disclaimer
 Instructions adapted from [tutorials-raspberrypi.de](http://tutorials-raspberrypi.de/).
