@@ -1,7 +1,7 @@
 MFRC522-python
 ==============
 
-# Table of Contents
+## Table of Contents
 1. [Install on Raspberry Pi running Jessie](#install-on-raspberry-pi-running-jessie-)
 2. [Install on Raspberry Pi running Wheezy](#install-on-raspberry-pi-running-wheezy-)
 3. [Usage](#usage)
@@ -84,5 +84,5 @@ Import the class by importing MFRC522 in the top of your script. For more info s
 - [MIFARE Classic EV1 1K Data Sheet](http://cache.nxp.com/documents/data_sheet/MF1S50YYX_V1.pdf)
 
 # Disclaimer
-Instructions adapted from [tutorials-raspberrypi.de](http://tutorials-raspberrypi.de/).
+Instructions adapted from [tutorials-raspberrypi.de](http://tutorials-raspberrypi.de/).  
 Original source code: https://github.com/mxgxw/MFRC522-python.
