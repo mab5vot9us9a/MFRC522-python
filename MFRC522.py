@@ -18,9 +18,14 @@ class MFRC522:
     MIFAREReader = MFRC522()
     (status, TagType) = MIFAREReader.Request(MIFAREReader.PICC_REQIDL)
     (status, uid) = MIFAREReader.Anticoll()
-    MIFAREReader.SelectTag(uid)
-    # Now comes the action like .Write(blockAddr, data)
+    if status == MI_OK:
+        MIFAREReader.SelectTag(uid)
+        status = MIFAREReader.Auth(MIFAREReader.PICC_AUTHENT1A, blockAddr, key, uid)
+        if status == MIFAREReader.MI_OK:
+            # Now comes the action like .Write(blockAddr, data)
     ```
+    Actions that read/write to multiple sectors can ommit the authentication part, since
+    it is done internally multiple times for the different sectors.
 
     Args:
         dev (string): The socket to use. "/dev/spidev0.0" by default.
@@ -360,6 +365,14 @@ class MFRC522:
             return 0
 
     def Auth(self, authMode, BlockAddr, Sectorkey, serNum):
+        """
+        Authenticate with the tag. After a successful authentication you are
+        authorized (according to the access bits) for the whole sector.
+        You only need to reauthenticate when you are switching sectors.
+
+        Returns:
+            int: The status of the authentication. Either one of .MI_OK, .MI_NOTAGERR, .MI_ERR.
+        """
         buff = []
 
         # First byte should be the authMode (A or B)
@@ -369,16 +382,10 @@ class MFRC522:
         buff.append(BlockAddr)
 
         # Now we need to append the authKey which usually is 6 bytes of 0xFF
-        i = 0
-        while(i < len(Sectorkey)):
-            buff.append(Sectorkey[i])
-            i = i + 1
-        i = 0
+        buff += Sectorkey[0:len(Sectorkey)]
 
         # Next we append the first 4 bytes of the UID
-        while(i < 4):
-            buff.append(serNum[i])
-            i = i + 1
+        buff += serNum[0:4]
 
         # Now we start the authentication itself
         (status, backData, backLen) = self.ToCard(self.PCD_AUTHENT, buff)
